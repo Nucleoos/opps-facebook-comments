@@ -1,4 +1,6 @@
-opps.facebook.comment
-=====================
+opps-facebook-comments
+======================
 
-Application Facebook Comment for Opps
+Facebook Comments App to Opps CMS
+
+

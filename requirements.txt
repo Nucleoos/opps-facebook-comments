@@ -1,0 +1,2 @@
+-e git+https://github.com/opps/opps.git#egg=opps
+facepy==0.8.4
