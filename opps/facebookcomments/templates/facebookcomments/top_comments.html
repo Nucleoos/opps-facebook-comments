@@ -1,0 +1,12 @@
+{% load facebook_comments %}
+<div class='top-comments'>
+  <ul>
+    {% for comment in comments %}
+    <li>
+      <span>{{ comment.post.title }}</span>
+      <span>{{ comment.date_added|date:"d/m/Y h:m" }}</span>
+      <span>{{ comment.text }}</span> 
+    </li>
+    {% endfor%}
+  </ul>
+</div>
