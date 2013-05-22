@@ -13,6 +13,10 @@ class TopComment(Publishable):
     comment_count = models.IntegerField(_(u'Total de comentários'), default=0)
     date_added = models.DateTimeField(_(u'Data/Hora do comentário'))
 
+
+    __unicode__  = lambda self: u"{} - {}".format(self.profile_name,
+                                                  self.comment_text)
+
     class Meta:
         verbose_name = _(u'Top Comentário')
         verbose_name_plural = _(u'Top Comentários')

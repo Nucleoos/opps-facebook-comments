@@ -5,7 +5,12 @@ from .models import TopComment
 
 class TopCommentAdmin(admin.ModelAdmin):
     model = TopComment
-    list_display = ('post', 'comment_count')
+
+    raw_id_fields = ('post', )
+
+    list_display = ('post', 'comment_text', 'comment_count', 'date_added')
 
     def has_add_permission(self, request):
         return False
+
+admin.site.register(TopComment, TopCommentAdmin)
