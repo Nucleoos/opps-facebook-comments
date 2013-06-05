@@ -30,12 +30,16 @@ def process_posts(posts):
 
     graph = GraphAPI(token)
 
-    for post in posts.iterator():
+    print "Queue:", posts.count()
 
+    for post in posts.iterator():
+        print "Processing:", post.slug
         comment_data = get_top_comment_info(
             graph,
             post.get_http_absolute_url()
         )
+
+        print "get data", comment_data
 
         if comment_data.get('profile_name'):
             comment_count = comment_data.get('comment_count')
@@ -43,6 +47,7 @@ def process_posts(posts):
             profile_name = comment_data.get('profile_name')
             comment_time = comment_data.get('comment_time')
 
+            # TODO: Use get_or_create
             try:
                 top = TopComment.objects.get(post=post)
                 top.comment_count = comment_count
@@ -94,11 +99,15 @@ def get_top_comment_info(graph, url):
         "link_stat WHERE url='{}'"
     ).format(url)
 
+    print query1
+
     query2 = (
         "SELECT time, fromid, text FROM comment WHERE object_id IN "
         "(SELECT comments_fbid FROM link_stat WHERE url = '{}') ORDER BY "
         "likes DESC LIMIT 1"
     ).format(url)
+
+    print query2
 
     comment_count = 0
     comment_text = ''
