@@ -60,7 +60,7 @@ def process_posts(posts):
                     post=post,
                     comment_count=comment_count,
                     profile_name=profile_name,
-                    text=comment_text,
+                    comment_text=comment_text,
                     date_added=comment_time,
                     user=post.user,
                     site=post.site
