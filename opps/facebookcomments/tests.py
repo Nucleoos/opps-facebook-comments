@@ -3,6 +3,7 @@ from django.test import TestCase
 
 from .tasks import update_weekly_posts, update_all_published_posts
 
+
 class TopCommentTest(TestCase):
     def setUp(self):
         pass
@@ -18,7 +19,6 @@ class TopCommentTest(TestCase):
         self.assertEqual(result.status, 'SUCCESS')
         self.assertTrue(result.ready())
 
-
     def test_celery_update_all_published_posts(self):
         result = update_all_published_posts.delay()
         # wait for 5 seconds to see if taks is over
@@ -26,5 +26,3 @@ class TopCommentTest(TestCase):
         self.assertTrue(result.successful())
         self.assertEqual(result.status, 'SUCCESS')
         self.assertTrue(result.ready())
-
-

@@ -18,20 +18,25 @@ def process_posts(posts):
     """
     Do facebook requests for the posts urls and update the comment count
     """
-    has_attrs = hasattr(settings, 'FACEBOOK_APP_ID') and \
-                hasattr(settings, 'FACEBOOK_API_SECRET')
-    token =  get_application_access_token(settings.FACEBOOK_APP_ID,
-                                          settings.FACEBOOK_API_SECRET)
 
-    graph = GraphAPI(token)
+    APP_ID = getattr(settings, 'FACEBOOK_APP_ID', None)
+    API_SECRET = getattr(settings, 'FACEBOOK_API_SECRET', None)
 
-
-    if not has_attrs:
+    if not APP_ID and API_SECRET:
         raise ImproperlyConfigured('You must have an FACEBOOK_APP_ID and a '
                                    ' FACEBOOK_API_SECRET in your settings.py')
 
+    token = get_application_access_token(APP_ID, API_SECRET)
+
+    graph = GraphAPI(token)
+
     for post in posts.iterator():
-        comment_data = get_top_comment_info(graph, post.get_absolute_url())
+
+        comment_data = get_top_comment_info(
+            graph,
+            post.get_http_absolute_url()
+        )
+
         if comment_data.get('profile_name'):
             comment_count = comment_data.get('comment_count')
             comment_text = comment_data.get('comment_text')
@@ -46,13 +51,15 @@ def process_posts(posts):
                 top.date_added = comment_time
                 top.save()
             except TopComment.DoesNotExist:
-                TopComment.objects.create(post=post,
-                                          comment_count=comment_count,
-                                          profile_name=profile_name,
-                                          text=comment_text,
-                                          date_added=comment_time,
-                                          user=post.user,
-                                          site=post.site)
+                TopComment.objects.create(
+                    post=post,
+                    comment_count=comment_count,
+                    profile_name=profile_name,
+                    text=comment_text,
+                    date_added=comment_time,
+                    user=post.user,
+                    site=post.site
+                )
 
 
 @periodic_task(run_every=crontab(hour="23", minute="59", day_of_week="*"))
@@ -62,6 +69,7 @@ def update_all_published_posts():
     """
     posts = Post.objects.all_published().filter(site=settings.SITE_ID)
     process_posts(posts)
+
 
 @periodic_task(run_every=crontab(hour="23", minute="59", day_of_week="*"))
 def update_weekly_posts():
@@ -81,12 +89,16 @@ def get_top_comment_info(graph, url):
     Returns facebook comment count, profile pic and comment
     for a given url
     """
-    query1 = "SELECT commentsbox_count FROM link_stat WHERE url='{}'".format(
-        url
-    )
-    query2 = ("SELECT time, fromid, text FROM comment WHERE object_id IN "
-            "(SELECT comments_fbid FROM link_stat WHERE url = '{}') ORDER BY "
-            "likes DESC LIMIT 1".format(url))
+    query1 = (
+        "SELECT commentsbox_count FROM "
+        "link_stat WHERE url='{}'"
+    ).format(url)
+
+    query2 = (
+        "SELECT time, fromid, text FROM comment WHERE object_id IN "
+        "(SELECT comments_fbid FROM link_stat WHERE url = '{}') ORDER BY "
+        "likes DESC LIMIT 1"
+    ).format(url)
 
     comment_count = 0
     comment_text = ''
@@ -101,6 +113,7 @@ def get_top_comment_info(graph, url):
             comment_count = request['data'][0]['commentsbox_count']
         except IndexError:
             pass
+
     # get top like comment
     request = graph.fql(query2)
     if 'data' in request:
