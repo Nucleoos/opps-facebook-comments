@@ -14,7 +14,6 @@ from celery.task.schedules import crontab
 from facepy import GraphAPI
 from facepy.utils import get_application_access_token
 
-
 def process_posts(posts):
     """
     Do facebook requests for the posts urls and update the comment count

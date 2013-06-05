@@ -10,7 +10,4 @@ class TopCommentAdmin(admin.ModelAdmin):
 
     list_display = ('post', 'comment_text', 'comment_count', 'date_added')
 
-    def has_add_permission(self, request):
-        return False
-
 admin.site.register(TopComment, TopCommentAdmin)
