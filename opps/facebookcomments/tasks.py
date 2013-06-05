@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import logging
 
 from django.conf import settings
 from django.utils import timezone
@@ -80,6 +81,7 @@ def get_top_comment_info(graph, url):
     """
     Returns facebook comment count, profile pic and comment
     for a given url
+    TODO: Use facebook's fql multiquery to get the results
     """
     query1 = "SELECT commentsbox_count FROM link_stat WHERE url='{}'".format(
         url
@@ -95,14 +97,27 @@ def get_top_comment_info(graph, url):
     comment_time = 0
 
     # get comment count for url
-    request = graph.fql(query1)
+    try:
+        request = graph.fql(query1)
+    except Exception as e:
+        logging.warning(u'Facebook graph exception on comment count '
+                        u'query: %s' % e)
+        return {}
+
     if 'data' in request:
         try:
             comment_count = request['data'][0]['commentsbox_count']
         except IndexError:
             pass
+
     # get top like comment
-    request = graph.fql(query2)
+    try:
+        request = graph.fql(query2)
+    except Exception as e:
+        logging.warning(u'Facebook graph exception on top like comment: %s' %
+                        e)
+        return {}
+
     if 'data' in request:
         try:
             data = request['data'][0]
@@ -123,6 +138,5 @@ def get_top_comment_info(graph, url):
         'comment_time': comment_time,
         'profile_name': profile_name,
     }
-    #print comment_data
 
     return comment_data
