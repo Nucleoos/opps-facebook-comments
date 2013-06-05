@@ -103,15 +103,11 @@ def get_top_comment_info(graph, url):
         "link_stat WHERE url='{}'"
     ).format(url)
 
-    print query1
-
     query2 = (
         "SELECT time, fromid, text FROM comment WHERE object_id IN "
         "(SELECT comments_fbid FROM link_stat WHERE url = '{}') ORDER BY "
         "likes DESC LIMIT 1"
     ).format(url)
-
-    print query2
 
     comment_count = 0
     comment_text = ''
