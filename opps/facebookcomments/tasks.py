@@ -56,6 +56,8 @@ def process_posts(posts):
                 top.date_added = comment_time
                 top.save()
             except TopComment.DoesNotExist:
+                # TODO: save each comment in a separate model
+                # retrieve only latest published
                 TopComment.objects.create(
                     post=post,
                     comment_count=comment_count,
@@ -63,7 +65,8 @@ def process_posts(posts):
                     comment_text=comment_text,
                     date_added=comment_time,
                     user=post.user,
-                    site=post.site
+                    site=post.site,
+                    published=True
                 )
 
 
