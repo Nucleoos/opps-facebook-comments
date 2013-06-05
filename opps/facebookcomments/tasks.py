@@ -152,7 +152,12 @@ def get_top_comment_info(graph, url):
 
     # get top comment user info
     if profile_id.isdigit():
-        user_info = graph.get(profile_id)
+        try:
+            user_info = graph.get(profile_id)
+        except Exception as e:
+            logging.warning(u'Facebook graph exception on get user info: %s'
+                            % e)
+            return {}
         profile_name = user_info['name']
 
     comment_data = {
