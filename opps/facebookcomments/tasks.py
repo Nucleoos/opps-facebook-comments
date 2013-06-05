@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+import logging
 
 from django.conf import settings
 from django.utils import timezone
@@ -12,7 +13,6 @@ from celery.decorators import periodic_task
 from celery.task.schedules import crontab
 from facepy import GraphAPI
 from facepy.utils import get_application_access_token
-
 
 def process_posts(posts):
     """
@@ -96,21 +96,18 @@ def get_top_comment_info(graph, url):
     """
     Returns facebook comment count, profile pic and comment
     for a given url
+    TODO: Use facebook's fql multiquery to get the results
     """
     query1 = (
         "SELECT commentsbox_count FROM "
         "link_stat WHERE url='{}'"
     ).format(url)
 
-    print query1
-
     query2 = (
         "SELECT time, fromid, text FROM comment WHERE object_id IN "
         "(SELECT comments_fbid FROM link_stat WHERE url = '{}') ORDER BY "
         "likes DESC LIMIT 1"
     ).format(url)
-
-    print query2
 
     comment_count = 0
     comment_text = ''
@@ -119,7 +116,13 @@ def get_top_comment_info(graph, url):
     comment_time = 0
 
     # get comment count for url
-    request = graph.fql(query1)
+    try:
+        request = graph.fql(query1)
+    except Exception as e:
+        logging.warning(u'Facebook graph exception on comment count '
+                        u'query: %s' % e)
+        return {}
+
     if 'data' in request:
         try:
             comment_count = request['data'][0]['commentsbox_count']
@@ -127,7 +130,13 @@ def get_top_comment_info(graph, url):
             pass
 
     # get top like comment
-    request = graph.fql(query2)
+    try:
+        request = graph.fql(query2)
+    except Exception as e:
+        logging.warning(u'Facebook graph exception on top like comment: %s' %
+                        e)
+        return {}
+
     if 'data' in request:
         try:
             data = request['data'][0]
@@ -139,7 +148,12 @@ def get_top_comment_info(graph, url):
 
     # get top comment user info
     if profile_id.isdigit():
-        user_info = graph.get(profile_id)
+        try:
+            user_info = graph.get(profile_id)
+        except Exception as e:
+            logging.warning(u'Facebook graph exception on get user info: %s'
+                            % e)
+            return {}
         profile_name = user_info['name']
 
     comment_data = {
@@ -148,6 +162,5 @@ def get_top_comment_info(graph, url):
         'comment_time': comment_time,
         'profile_name': profile_name,
     }
-    #print comment_data
 
     return comment_data
