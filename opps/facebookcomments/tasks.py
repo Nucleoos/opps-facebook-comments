@@ -14,6 +14,7 @@ from celery.task.schedules import crontab
 from facepy import GraphAPI
 from facepy.utils import get_application_access_token
 
+
 def process_posts(posts):
     """
     Do facebook requests for the posts urls and update the comment count
@@ -30,16 +31,16 @@ def process_posts(posts):
 
     graph = GraphAPI(token)
 
-    print "Queue:", posts.count()
+    # print "Queue:", posts.count()
 
     for post in posts.iterator():
-        print "Processing:", post.slug
+        # print "Processing:", post.slug
         comment_data = get_top_comment_info(
             graph,
             post.get_http_absolute_url()
         )
 
-        print "get data", comment_data
+        # print "get data", comment_data
 
         if comment_data.get('profile_name'):
             comment_count = comment_data.get('comment_count')
@@ -85,7 +86,7 @@ def update_weekly_posts():
     updates the weekly post comment count
     """
     today = timezone.now()
-    days_ago = today - timezone.timedelta(days=30)
+    days_ago = today - timezone.timedelta(days=7)
 
     posts = Post.objects.all_published().filter(site=settings.SITE_ID)
     posts = posts.filter(date_available__range=(days_ago, today))
