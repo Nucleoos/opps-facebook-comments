@@ -5,6 +5,7 @@ import logging
 from django.conf import settings
 from django.utils import timezone
 from django.core.exceptions import ImproperlyConfigured
+from django.db import transaction
 
 from .models import TopComment
 
@@ -15,6 +16,7 @@ from facepy import GraphAPI
 from facepy.utils import get_application_access_token
 
 
+@transaction.commit_on_success
 def process_posts(posts):
     """
     Do facebook requests for the posts urls and update the comment count
