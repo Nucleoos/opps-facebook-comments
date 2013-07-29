@@ -6,7 +6,6 @@ from django.conf import settings
 from django.utils import timezone
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
-from django.contrib.sites.models import Site
 
 from .models import TopComment
 
@@ -16,7 +15,6 @@ from celery.task.schedules import crontab
 from facepy import GraphAPI
 from facepy.utils import get_application_access_token
 
-all_sites = Site.objects.all()
 
 @transaction.commit_on_success
 def process_posts(containers):
