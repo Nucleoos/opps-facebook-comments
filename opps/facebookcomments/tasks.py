@@ -6,18 +6,20 @@ from django.conf import settings
 from django.utils import timezone
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
+from django.contrib.sites.models import Site
 
 from .models import TopComment
 
-from opps.articles.models import Post
+from opps.containers.models import Container
 from celery.decorators import periodic_task
 from celery.task.schedules import crontab
 from facepy import GraphAPI
 from facepy.utils import get_application_access_token
 
+all_sites = Site.objects.all()
 
 @transaction.commit_on_success
-def process_posts(posts):
+def process_posts(containers):
     """
     Do facebook requests for the posts urls and update the comment count
     """
@@ -35,11 +37,11 @@ def process_posts(posts):
 
     # print "Queue:", posts.count()
 
-    for post in posts.iterator():
+    for container in container.iterator():
         # print "Processing:", post.slug
         comment_data = get_top_comment_info(
             graph,
-            post.get_http_absolute_url()
+            container.get_http_absolute_url()
         )
 
         # print "get data", comment_data
@@ -52,7 +54,7 @@ def process_posts(posts):
 
             # TODO: Use get_or_create
             try:
-                top = TopComment.objects.get(post=post)
+                top = TopComment.objects.get(container=container)
                 top.comment_count = comment_count
                 top.comment_text = comment_text
                 top.profile_name = profile_name
@@ -62,13 +64,13 @@ def process_posts(posts):
                 # TODO: save each comment in a separate model
                 # retrieve only latest published
                 TopComment.objects.create(
-                    post=post,
+                    container=container,
                     comment_count=comment_count,
                     profile_name=profile_name,
                     comment_text=comment_text,
                     date_added=comment_time,
-                    user=post.user,
-                    site=post.site,
+                    user=container.user,
+                    site=container.site,
                     published=True
                 )
 
@@ -78,7 +80,7 @@ def update_all_published_posts():
     """
     updates the published posts comment count
     """
-    posts = Post.objects.all_published().filter(site=settings.SITE_ID)
+    posts = Container.objects.all_published()
     process_posts(posts)
 
 
@@ -90,7 +92,7 @@ def update_weekly_posts():
     today = timezone.now()
     days_ago = today - timezone.timedelta(days=7)
 
-    posts = Post.objects.all_published().filter(site=settings.SITE_ID)
+    posts = Container.objects.all_published()
     posts = posts.filter(date_available__range=(days_ago, today))
     process_posts(posts)
 

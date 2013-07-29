@@ -7,7 +7,7 @@ from opps.containers.models import Container
 
 
 class TopComment(Publishable):
-    post = models.OneToOneField(Container)
+    container = models.OneToOneField(Container)
     profile_name = models.CharField(_(u'Nome do comentarista'),
                                     max_length=255, blank=True)
     comment_text = models.TextField(_(u'Comentário'), blank=True)
