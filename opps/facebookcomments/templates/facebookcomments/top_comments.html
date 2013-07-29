@@ -3,8 +3,8 @@
   <ul>
     {% for comment in comments %}
     <li>
-      <span>{{ comment.post.title }}</span>
-      <span>{{ comment.date_added|date:"d/m/Y h:m" }}</span>
+      <span>{{ comment.container.title }}</span>
+      <span>{{ comment.date_insert|date:"d/m/Y h:m" }}</span>
       <span>{{ comment.text }}</span> 
     </li>
     {% endfor%}

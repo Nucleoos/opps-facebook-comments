@@ -3,11 +3,11 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from opps.core.models import Publishable
-from opps.articles.models import Post
+from opps.containers.models import Container
 
 
 class TopComment(Publishable):
-    post = models.OneToOneField(Post)
+    post = models.OneToOneField(Container)
     profile_name = models.CharField(_(u'Nome do comentarista'),
                                     max_length=255, blank=True)
     comment_text = models.TextField(_(u'Comentário'), blank=True)

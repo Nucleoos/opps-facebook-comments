@@ -30,6 +30,8 @@ if not settings.configured:
 
             'opps.core',
             'opps.channels',
+            'opps.containers',
+            'opps.archives',
             'opps.boxes',
             'opps.sources',
             'opps.articles',
@@ -38,7 +40,6 @@ if not settings.configured:
             'opps.flatpages',
 
             'opps.facebookcomments',
-            'taggit',
 
         ),
         SITE_ID = 1,
