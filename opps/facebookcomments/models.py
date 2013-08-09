@@ -8,16 +8,16 @@ from opps.containers.models import Container
 
 class TopComment(Publishable):
     container = models.OneToOneField(Container)
-    profile_name = models.CharField(_(u'Nome do comentarista'),
+    profile_name = models.CharField(_(u'Profile Name'),
                                     max_length=255, blank=True)
-    comment_text = models.TextField(_(u'Comentário'), blank=True)
-    comment_count = models.IntegerField(_(u'Total de comentários'), default=0)
-    date_added = models.DateTimeField(_(u'Data/Hora do comentário'))
+    comment_text = models.TextField(_(u'Comment'), blank=True)
+    comment_count = models.IntegerField(_(u'Comment count'), default=0)
+    date_added = models.DateTimeField(_(u'Date added'))
 
     def __unicode__(self):
         return u"{} - {}".format(self.profile_name, self.comment_text)
 
     class Meta:
-        verbose_name = _(u'Top Comentário')
-        verbose_name_plural = _(u'Top Comentários')
+        verbose_name = _(u'Top Comment')
+        verbose_name_plural = _(u'Top Comments')
         ordering = ('comment_count', '-id')
